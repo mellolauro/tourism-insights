@@ -1,0 +1,58 @@
+version: "3.9"
+
+services:
+
+  api:
+    build: ./api_backend
+    container_name: tourism_api
+    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./api_backend:/app
+    env_file:
+      - .env
+    depends_on:
+      - postgres
+      - minio
+
+  nextjs:
+    build: ./dashboard/nextjs-app
+    container_name: tourism_frontend
+    command: npm run dev
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./dashboard/nextjs-app:/app
+    depends_on:
+      - api
+
+  postgres:
+    image: postgres:15
+    container_name: tourism_db
+    environment:
+      POSTGRES_USER: tourism
+      POSTGRES_PASSWORD: tourism123
+      POSTGRES_DB: tourism_dw
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./data_warehouse/db_init.sql:/docker-entrypoint-initdb.d/db_init.sql
+
+  minio:
+    image: minio/minio
+    container_name: tourism_datalake
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: admin
+      MINIO_ROOT_PASSWORD: admin123
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - miniodata:/data
+
+volumes:
+  pgdata:
+  miniodata:

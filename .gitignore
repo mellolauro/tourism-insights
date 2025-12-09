@@ -1,0 +1,59 @@
+# Arquivos de Sistema Operacional e Editor
+######################################
+.DS_Store
+Thumbs.db
+.vscode/
+
+# Python
+########
+# Arquivos de cache e otimização
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Pastas de ambiente virtual
+.venv
+venv/
+env/
+/lib/python*/site-packages/
+
+# Logs e Dados Gerados/Temporários
+################################
+*.log
+*.sqlite
+*.db # Ignora o db.sqlite ou outros arquivos .db (embora você tenha um db.py)
+db_init.sql # Pode ser ignorado se for apenas para inicializar o DB localmente
+
+# Dependências (Node/npm, se houver, pelo package-lock.json)
+###########################################################
+node_modules/
+/package-lock.json # Geralmente é bom versionar, mas se for estritamente ambiente local, pode ignorar.
+                # Deixando comentado, mas se o projeto for Python principal, você pode remover.
+
+# Backend (Cache da API)
+#######################
+/api_backend/.pycache__
+
+# AI/Dados (Geralmente são grandes e não devem ser versionados)
+###############################################################
+# Ignore a pasta 'sample_data' dentro de 'ai_models'
+/ai_models/sample_data/
+
+# Dados Brutos de Input
+/raw_storage/
+
+# Variáveis de ambiente e Segredos
+#################################
+.env
+
+# Docker
+########
+# Ignore volumes e caches do Docker
+*.swp
+*.bak
+.docker/
+docker-compose.local.yml # Se você tiver um arquivo local
+
+# Processamento e ETL (Opcional, se gerar arquivos temporários)
+/processing/*.tmp
