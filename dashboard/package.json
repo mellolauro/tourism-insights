@@ -1,5 +1,24 @@
 {
+  "name": "dashboard",
+  "version": "1.0.0",
+  "description": "",
+  "homepage": "https://github.com/mellolauro/tourism-insights-front#readme",
+  "bugs": {
+    "url": "https://github.com/mellolauro/tourism-insights-front/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mellolauro/tourism-insights-front.git"
+  },
+  "license": "ISC",
+  "author": "",
+  "type": "commonjs",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
   "dependencies": {
+    "framer-motion": "^12.23.26",
     "recharts": "^3.5.1"
   }
 }

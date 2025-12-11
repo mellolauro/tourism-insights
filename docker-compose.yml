@@ -5,25 +5,30 @@ services:
   api:
     build: ./api_backend
     container_name: tourism_api
-    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+    command: uvicorn main:app --host 0.0.0.0 --port 8000
     ports:
       - "8000:8000"
-    volumes:
-      - ./api_backend:/app
     env_file:
       - .env
+    networks:
+      - tourism_net
     depends_on:
       - postgres
       - minio
 
   nextjs:
-    build: ./dashboard/nextjs-app
+    build:
+      context: ./dashboard/nextjs-app
+      dockerfile: Dockerfile.prod
     container_name: tourism_frontend
-    command: npm run dev
+    command: npm start
     ports:
       - "3000:3000"
-    volumes:
-      - ./dashboard/nextjs-app:/app
+    environment:
+      NODE_ENV: production
+      NEXT_PUBLIC_API_URL: "http://tourism_api:8000/api"
+    networks:
+      - tourism_net
     depends_on:
       - api
 
@@ -36,6 +41,8 @@ services:
       POSTGRES_DB: tourism_dw
     ports:
       - "5432:5432"
+    networks:
+      - tourism_net
     volumes:
       - pgdata:/var/lib/postgresql/data
       - ./data_warehouse/db_init.sql:/docker-entrypoint-initdb.d/db_init.sql
@@ -50,8 +57,14 @@ services:
     ports:
       - "9000:9000"
       - "9001:9001"
+    networks:
+      - tourism_net
     volumes:
       - miniodata:/data
+
+networks:
+  tourism_net:
+    driver: bridge
 
 volumes:
   pgdata:

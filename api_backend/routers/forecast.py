@@ -3,7 +3,7 @@ from pydantic import BaseModel
 import pandas as pd
 from prophet import Prophet
 from datetime import datetime
-from api_backend import get_dw_connection 
+from db import get_dw_connection 
 
 router = APIRouter()
 

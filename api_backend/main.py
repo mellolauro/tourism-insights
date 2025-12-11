@@ -1,5 +1,6 @@
 from fastapi import FastAPI
-from api_backend.routers import forecast
+from routers import forecast
+from routers import analytics
 
 app = FastAPI(
     title="Tourism Insights API",
@@ -7,7 +8,7 @@ app = FastAPI(
 )
 
 app.include_router(forecast.router, prefix="/api", tags=["Forecast"])
-
+app.include_router(analytics.router, prefix="/api", tags=["Analytics"])
 
 @app.get("/")
 def root():
