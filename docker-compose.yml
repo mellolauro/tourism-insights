@@ -20,13 +20,19 @@ services:
     build:
       context: ./dashboard/nextjs-app
       dockerfile: Dockerfile.prod
+      # AÇÃO CRÍTICA: Passa a variável pública para o BUILD TIME (ARG no Dockerfile)
+      args:
+        NEXT_PUBLIC_API_URL: "http://localhost:8000/api/v1"
     container_name: tourism_frontend
     command: npm start
     ports:
       - "3000:3000"
     environment:
       NODE_ENV: production
-      NEXT_PUBLIC_API_URL: "http://tourism_api:8000/api"
+      # AÇÃO 2: Mantém a variável pública no RUNTIME (para SSR e fallback)
+      NEXT_PUBLIC_API_URL: "http://localhost:8000/api/v1"
+      # Variável interna (para uso estrito em SSR dentro da rede Docker)
+      INTERNAL_API_URL: "http://tourism_api:8000/api/v1"
     networks:
       - tourism_net
     depends_on:

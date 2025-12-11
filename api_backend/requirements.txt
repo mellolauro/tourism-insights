@@ -1,7 +1,9 @@
 fastapi
 uvicorn[standard]
 pandas
+starlette
 sqlalchemy
+python-multipart
 psycopg2-binary
 prophet
 minio
