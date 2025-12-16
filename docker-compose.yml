@@ -1,74 +1,67 @@
 services:
-
   api:
     build:
       context: ./api_backend
-      dockerfile: Dockerfile
     container_name: tourism_api
+    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
     ports:
       - "8000:8000"
-    environment:
-      DATABASE_URL: postgresql+asyncpg://tourism:tourism123@tourism_db/tourism_dw
-    command: uvicorn main:app --host 0.0.0.0 --port 8000
     env_file:
       - .env
+    depends_on:
+      - tourism_db
+      - tourism_datalake
     networks:
       - tourism_net
-    depends_on:
-      - postgres
-      - minio
 
-  nextjs:
+  frontend:
     build:
       context: ./dashboard/nextjs-app
       dockerfile: Dockerfile.prod
     container_name: tourism_frontend
-    command: npm start
     ports:
       - "3000:3000"
-    environment:
-      NODE_ENV: production
-      NEXT_PUBLIC_API_URL: "http://localhost:8000/api/v1"
-      INTERNAL_API_URL: "http://tourism_api:8000/api/v1"
-    networks:
-      - tourism_net
+    env_file:
+      - .env
     depends_on:
       - api
-
-  postgres:
-    image: postgres:15
-    container_name: tourism_db
-    environment:
-      POSTGRES_USER: tourism
-      POSTGRES_PASSWORD: tourism123
-      POSTGRES_DB: tourism_dw
-    ports:
-      - "5432:5432"
     networks:
       - tourism_net
-    volumes:
-      - pgdata:/var/lib/postgresql/data
-      - ./data_warehouse/db_init.sql:/docker-entrypoint-initdb.d/db_init.sql
 
-  minio:
+  tourism_db:
+    image: postgres:15
+    container_name: tourism_db
+    restart: always
+    environment:
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASS}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - tourism_net
+
+  tourism_datalake:
     image: minio/minio
     container_name: tourism_datalake
     command: server /data --console-address ":9001"
     environment:
-      MINIO_ROOT_USER: admin
-      MINIO_ROOT_PASSWORD: admin123
+      MINIO_ROOT_USER: ${MINIO_ACCESS_KEY}
+      MINIO_ROOT_PASSWORD: ${MINIO_SECRET_KEY}
     ports:
       - "9000:9000"
       - "9001:9001"
+    volumes:
+      - minio_data:/data
     networks:
       - tourism_net
-    volumes:
-      - miniodata:/data
+
+volumes:
+  postgres_data:
+  minio_data:
 
 networks:
   tourism_net:
     driver: bridge
-
-volumes:
-  pgdata:
-  miniodata:
