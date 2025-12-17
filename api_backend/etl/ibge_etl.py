@@ -3,7 +3,7 @@ from datetime import datetime
 from db import get_dw_connection
 import json
 
-IBGE_URL = "https://apisidra.ibge.gov.br/values/t/5932/n1/all/v/93/p/all"
+IBGE_URL = "https://servicodados.ibge.gov.br/api/v3/agregados"
 
 def run_ibge_etl():
     conn = get_dw_connection()

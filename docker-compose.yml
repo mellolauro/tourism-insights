@@ -3,9 +3,16 @@ services:
     build:
       context: ./api_backend
     container_name: tourism_api
+    restart: unless-stopped
     command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
     ports:
       - "8000:8000"
+    environment:
+      POSTGRES_HOST: tourism_db
+      POSTGRES_PORT: 5432
+      POSTGRES_DB: tourism_dw
+      POSTGRES_USER: tourism
+      POSTGRES_PASSWORD: tourism123
     env_file:
       - .env
     depends_on:
@@ -19,6 +26,7 @@ services:
       context: ./dashboard/nextjs-app
       dockerfile: Dockerfile.prod
     container_name: tourism_frontend
+    restart: unless-stopped
     ports:
       - "3000:3000"
     env_file:
@@ -31,21 +39,23 @@ services:
   tourism_db:
     image: postgres:15
     container_name: tourism_db
-    restart: always
+    restart: unless-stopped
     environment:
-      POSTGRES_DB: ${DB_NAME}
-      POSTGRES_USER: ${DB_USER}
-      POSTGRES_PASSWORD: ${DB_PASS}
+      POSTGRES_DB: tourism_dw
+      POSTGRES_USER: tourism
+      POSTGRES_PASSWORD: tourism123
     ports:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+      - ./api_backend/db/init:/docker-entrypoint-initdb.d
     networks:
       - tourism_net
 
   tourism_datalake:
     image: minio/minio
     container_name: tourism_datalake
+    restart: unless-stopped
     command: server /data --console-address ":9001"
     environment:
       MINIO_ROOT_USER: ${MINIO_ACCESS_KEY}
