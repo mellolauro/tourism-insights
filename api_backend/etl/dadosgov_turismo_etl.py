@@ -2,6 +2,7 @@ import requests
 import json
 from datetime import datetime
 from db import get_dw_connection
+from psycopg2.extras import Json
 
 CATALOG_URL = "https://api.dados.gov.br/v1/datasets"
 QUERY = "turismo"

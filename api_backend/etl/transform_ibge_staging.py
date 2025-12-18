@@ -1,5 +1,4 @@
 import pandas as pd
-from datetime import datetime
 from db import get_dw_connection
 
 def transform():
@@ -13,20 +12,45 @@ def transform():
         LIMIT 1
     """, conn)
 
-    raw = df.iloc[0]["payload"]
+    if df.empty:
+        print("⚠️ Nenhum dado IBGE encontrado no RAW")
+        return
+
+    raw_payload = df.iloc[0, 0]  # <- acesso direto, sem ambiguidades
+
+    # ===============================
+    # VALIDAÇÃO DO PAYLOAD
+    # ===============================
+    if not isinstance(raw_payload, list):
+        print("❌ Payload IBGE não é LISTA")
+        print(type(raw_payload), raw_payload)
+        return
+
+    try:
+        series = raw_payload[0]["resultados"][0]["series"]
+    except (KeyError, IndexError, TypeError) as e:
+        print("❌ Estrutura inesperada do payload IBGE")
+        print(raw_payload)
+        print(e)
+        return
 
     rows = []
-    for serie in raw[0]["resultados"][0]["series"]:
-        for period, value in serie["serie"].items():
+
+    for serie in series:
+        for ref, value in serie["serie"].items():
             rows.append({
-                "reference_date": datetime.strptime(period, "%Y%m").date(),
-                "visitors": int(float(value) * 1000),
-                "origin": "IBGE"
+                "reference_date": f"{ref[:4]}-{ref[4:]}-01",
+                "visitors": int(value),
+                "origin": "Brasil"
             })
 
-    clean_df = pd.DataFrame(rows)
+    if not rows:
+        print("⚠️ Nenhum dado processado")
+        return
 
-    clean_df.to_sql(
+    staging_df = pd.DataFrame(rows)
+
+    staging_df.to_sql(
         "cleaned_tourism",
         conn,
         schema="staging",
@@ -35,7 +59,7 @@ def transform():
     )
 
     conn.close()
-    print("✔ STAGING IBGE pronto")
+    print(f"✔ {len(rows)} registros inseridos em STAGING")
 
 if __name__ == "__main__":
     transform()
